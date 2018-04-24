@@ -1,59 +1,47 @@
 import tensorflow as tf
 import numpy as np
 import Network as nt
-import DataConverter as dc
-
-import os
-#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+import DataManager as dm
 
 NAME = "CHAR_CNN"
+EPOCH_SIZE = 15
 BATCH_SIZE = 100
 
 def main(_):
     with tf.Session() as sess:
-        dataConverter = dc.DataConverter()
-        network = nt.Network(sess, NAME, dataConverter)
+        data_mgr = dm.DataManager()
+        network = nt.Network(sess, NAME)
 
-        for epoch in range(20):
-            Train(epoch, network, dataConverter)
-            Accuracy(network, dataConverter)
+        for epoch in range(EPOCH_SIZE):
+            Train(epoch, network, data_mgr)
+            Accuracy(epoch, network, data_mgr)
 
-def Train(epoch, network, dataConverter):
+def Train(epoch, network, data_mgr):
     print("==============", epoch, "===============")
-    dataConverter.ResetBatchTrainData()
+
+    data_mgr.ResetBatchTrainData()
     while True:
-        opinions = []
-        scores = []
-        train_data = dataConverter.GetTrainDataInfo(BATCH_SIZE)
-        if len(train_data) == 0:
-            break;
+        datas, labels = data_mgr.GetTrainDataAndLabel(BATCH_SIZE)
+        if len(datas) == 0:
+            break
 
-        for data in train_data:
-            idx = dataConverter.GetDataCharIndex(data)
-            opinions.append(idx)
-            scores.append([data.GetScore()])
+        network.Train(datas, labels)
 
-        network.Train(opinions, scores)
-
-def Accuracy(network, dataConverter):
+def Accuracy(poch, network, data_mgr):
     print("=== 측정 시작 ===")
-    dataConverter.ResetBatchTestData()
-    accuracy = []
-    while True:         
-        testOpnion = []
-        testScore = []
-        test_data = dataConverter.GetTestDataInfo(100)
-        if len(test_data) == 0:
-            print(np.mean(accuracy))
-            break;
-                
-        for data in test_data:
-            idx = dataConverter.GetDataCharIndex(data)
-            testOpnion.append(idx)
-            testScore.append([data.GetScore()])
 
-        result = network.Accuracy(testOpnion, testScore)
+    data_mgr.ResetBatchTestData()
+    accuracy = []
+    while True:
+        datas, labels = data_mgr.GetTestDataAndLabel(BATCH_SIZE)
+        if len(datas) == 0:
+            break
+
+        result = network.Accuracy(datas, labels)
+        result = np.reshape(result, [-1])
         accuracy.extend(result)
+
+    print(np.mean(accuracy))
 
 if __name__ == "__main__":
     tf.app.run()
