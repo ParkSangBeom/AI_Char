@@ -13,7 +13,7 @@ class Saver:
         self._CreateSaver();
 
     def _CreateDirection(self):
-        self._dir = self._check_point_path + "/" + self._name
+        self._dir = self._check_point_path + "/" + self._name + "/"
 
         if not os.path.exists(self._dir):
             os.makedirs(self._dir)
@@ -33,5 +33,5 @@ class Saver:
         else:
             print("Could not find old network weights")
 
-    def Save(self, step):
-        self._saver.save(self._sess, self._dir, global_step = step)
+    def Save(self):
+        self._saver.save(self._sess, self._dir)

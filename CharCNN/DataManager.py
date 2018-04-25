@@ -61,7 +61,7 @@ class DataManager:
                 info = DataInfo(s_line[1], s_line[2])
                 data_info_container.append(info)
 
-                #if index == 50000:
+                #if index == 30000:
                 #    break
 
                 index += 1
